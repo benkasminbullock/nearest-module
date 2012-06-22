@@ -13,6 +13,42 @@
 /* for isspace. */
 #include <ctype.h>
 
+#include "nearest-module.h"
+
+#ifdef HEADER
+
+/* String length restriction for maximum length of a module name. If
+   there is a CPAN module with a longer name than this, we are
+   finished. */
+
+#define MAXLEN 0x400
+
+typedef struct nearest_module
+{
+    /* The file to look at. */
+    gzFile * gzfile;
+    FILE * file;
+    /* Is this file a gz file? */
+    int is_gz : 1;
+    /* The term to search for. */
+    const char * search_term;
+    /* The length of the search term. */
+    int search_len;
+    /* The buffer. */
+    char buf[MAXLEN];
+    /* The length of the buffer. */
+    int buf_len;
+    /* The nearest module to the search term. */
+    char nearest[MAXLEN];
+    /* The edit distance from "search_term" to "nearest". */
+    int distance;
+    /* The name of the file to read from. */
+    const char * file_name;
+}
+nearest_module_t;
+
+#endif /* def HEADER */
+
 static void fail (int test, const char * message, ...)
 {
     if (test) {
@@ -24,6 +60,9 @@ static void fail (int test, const char * message, ...)
     }
     return;
 }
+
+/* Copy-paste from
+   "http://www.lemoda.net/c/levenshtein/index.html". */
 
 static int distance (const char * word1,
                      int len1,
@@ -73,115 +112,147 @@ static int distance (const char * word1,
     return matrix[len1][len2];
 }
 
-static int compare_line (char * buf, int len, const char * search_term,
-                         int search_len)
+static void nearest_compare_line (nearest_module_t * nearest)
 {
-    int buf_len;
+    /* The edit distance between "nearest->search_term" and the
+       truncated version of "nearest->buf". */
     int d;
-    /* */
-    for (buf_len = 0; !isspace (buf[buf_len]); buf_len++)
-        ;
-    buf[buf_len] = '\0';
-    //    printf ("%s\n", buf);
-    d = distance (buf, buf_len, search_term, search_len);
-    return d;
-}
+    /* The length of "nearest->buf" after truncation. */
+    int l;
+    /* Shorthand for "nearest->buf". */
+    char * b;
 
-static void search_packages_gz (const char * file_name, const char * search_term)
-{
-    gzFile * file;
-    int len = 0x400;
-    char buf[len];
-    file = gzopen (file_name, "r");
-    fail (! file, "Cannot open package file %s: %s", file_name, strerror (errno));
-    int min_dist = INT_MAX;
-    char closest[len];
-    int search_len;
-    search_len = strlen (search_term);
-    while (1) {
-        int err;
-        char * ret;
-        int dist;
-        ret = gzgets (file, buf, len);
-        if (ret == Z_NULL) {
-            if (! gzeof (file)) {
-                const char * error_string;
-                error_string = gzerror (file, & err);
-                fail (err, "Error reading %s: %s",
-                      file_name, error_string);
-            }
-            break;
-        }
-        dist = compare_line (buf, len, search_term, search_len);
-        if (dist < min_dist) {
-            min_dist = dist;
-            strncpy (closest, buf, len);
-        }
-    }
-    gzclose (file);
-    if (min_dist == 0) {
-        printf ("Found '%s'\n", closest);
-    }
-    else {
-        printf ("Closest to '%s' is '%s'.\n", search_term, closest);
+    b = nearest->buf;
+    /* Truncate "nearest->buf" at the first space character, or \0. */
+    for (l = 0; !isspace (b[l]) && b[l]; l++)
+        ;
+    b[l] = '\0';
+
+    d = distance (b, l, nearest->search_term, nearest->search_len);
+    if (d < nearest->distance) {
+        nearest->distance = d;
+        strncpy (nearest->nearest, nearest->buf, l);
     }
     return;
 }
 
-static void search_packages (const char * file_name, const char * search_term)
+static void
+nearest_open_file (nearest_module_t * nearest)
 {
-    FILE * file;
-    int len = 0x400;
-    char buf[len];
-    file = fopen (file_name, "r");
-    fail (! file, "Cannot open package file %s: %s", file_name, strerror (errno));
-    int min_dist = INT_MAX;
-    char closest[len];
-    int search_len;
-    search_len = strlen (search_term);
-    while (1) {
-        char * ret;
-        int dist = INT_MAX;
-        ret = fgets (buf, len, file);
-        if (! ret) {
-            if (! feof (file)) {
-                fail (1, "Error reading %s: %s",
-                      file_name, strerror (errno));
-            }
-            break;
-        }
-        dist = compare_line (buf, len, search_term, search_len);
-        if (dist < min_dist) {
-            min_dist = dist;
-            strncpy (closest, buf, len);
-        }
+    const char * gz;
+    gz = strstr (nearest->file_name, ".gz");
+    if (gz &&
+        strlen (nearest->file_name) - (gz - nearest->file_name) ==
+        strlen (".gz")) {
+        nearest->is_gz = 1;
     }
-    fclose (file);
-    if (min_dist == 0) {
-        printf ("Found '%s'\n", closest);
+    if (nearest->is_gz) {
+        nearest->gzfile = gzopen (nearest->file_name, "r");
     }
     else {
-        printf ("Closest to '%s' is '%s'.\n", search_term, closest);
+        nearest->file = fopen (nearest->file_name, "r");
+    }
+    fail ((nearest->is_gz && !nearest->gzfile) ||
+          (!nearest->is_gz && !nearest->file),
+          "Cannot open package file %s: %s",
+          nearest->file_name, strerror (errno));
+    return;
+}
+
+static void
+nearest_close_file (nearest_module_t * nearest)
+{
+    if (nearest->is_gz) {
+        gzclose (nearest->gzfile);
+    }
+    else {
+        fclose (nearest->file);
+    }
+    return;
+}
+
+static int
+nearest_get_line (nearest_module_t * nearest)
+{
+    char * ret;
+
+    if (nearest->is_gz) {
+        ret = gzgets (nearest->gzfile, nearest->buf, MAXLEN);
+        if (ret == Z_NULL) {
+            if (! gzeof (nearest->gzfile)) {
+                int err;
+                const char * error_string;
+                error_string = gzerror (nearest->gzfile, & err);
+                fail (err, "Error reading %s: %s",
+                      nearest->file_name, error_string);
+            }
+            return 0;
+        }
+    }
+    else {
+        ret = fgets (nearest->buf, MAXLEN - 1, nearest->file);
+        if (! ret) {
+            if (! feof (nearest->file)) {
+                fail (1, "Error reading %s: %s",
+                      nearest->file_name, strerror (errno));
+            }
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static void search_packages (nearest_module_t * nearest)
+{
+    nearest_open_file (nearest);
+    nearest->distance = INT_MAX;
+    while (nearest_get_line (nearest)) {
+        nearest_compare_line (nearest);
+    }
+    nearest_close_file (nearest);
+    return;
+}
+
+void
+nearest_set_search_term (nearest_module_t * nearest,
+                         const char * search_term)
+{
+    nearest->search_term = search_term;
+    nearest->search_len = strlen (nearest->search_term);
+    return;
+}
+
+void
+nearest_set_search_file (nearest_module_t * nearest,
+                         const char * file_name)
+{
+    nearest->file_name = file_name;
+    return;
+}
+
+#ifdef TEST
+
+static void print_result (nearest_module_t * nearest)
+{
+    if (nearest->distance == 0) {
+        printf ("Found '%s'\n", nearest->nearest);
+    }
+    else {
+        printf ("Closest to '%s' is '%s'.\n", nearest->search_term,
+                nearest->nearest);
     }
     return;
 }
 
 int main (int argc, char ** argv)
 {
-    const char * search_term;
-    /* The package file. */
+    nearest_module_t nearest = {0};
 
-    search_term = "Lingua::HarrayPotter::Stop::Weirds";
-#if 0
-    const char * packages =
-        "/home/ben/.cpan/sources/modules/02packages.details.txt.gz";
-    search_packages_gz (packages, search_term);
-#else
-    const char * packages =
-        "02packages.details.txt";
-    search_packages (packages, search_term);
-#endif
-    //    search_term = argv[1];
-    //    search_term = "CGI::Compress:Gzip";
+    nearest_set_search_term (& nearest, "Lingua::Stop::Weirds");
+    nearest_set_search_file (& nearest, "02packages.details.txt");
+
+    search_packages (& nearest);
+    print_result (& nearest);
     return 0;
 }
+#endif /* TEST */
