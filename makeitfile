@@ -8,7 +8,7 @@ leven-with-max:     leven-with-max.c
 	cc -g -Wall -O -o $@ leven-with-max.c
 
 clean:
-	-rm -f nearest-module
+	-rm -f nearest-module nearest-module.h leven-with-max
 
 # Local variables:
 # mode: makefile
