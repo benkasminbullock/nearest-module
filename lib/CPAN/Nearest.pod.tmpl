@@ -1,0 +1,21 @@
+=head1 NAME
+
+CPAN::Nearest - find the nearest module to a given name.
+
+=head1 SYNOPSIS
+
+    use CPAN::Nearest 'search';
+    my $module = search ('02package.details.txt', 'Lingua::Stop::Wars');
+    # Now $module = "Lingua::StopWords";
+
+=head1 FUNCTIONS
+
+=head2 search
+
+    my $close_name = search ($file, $module_name);
+
+Search the package detail file C<$file> for a module named
+C<$module_name> and return the closest name. E.g. if you search for
+"Harry::Potter", the closest module is "Data::Lotter".
+
+[% INCLUDE "author" %]

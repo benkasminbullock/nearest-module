@@ -213,7 +213,7 @@ static void search_packages (nearest_module_t * nearest)
     return;
 }
 
-void
+static void
 nearest_set_search_term (nearest_module_t * nearest,
                          const char * search_term)
 {
@@ -222,12 +222,24 @@ nearest_set_search_term (nearest_module_t * nearest,
     return;
 }
 
-void
+static void
 nearest_set_search_file (nearest_module_t * nearest,
                          const char * file_name)
 {
     nearest->file_name = file_name;
     return;
+}
+
+char *
+cpan_nearest_search (char * file_name, char * search_term)
+{
+    nearest_module_t nearest = {0};
+
+    nearest_set_search_term (& nearest, search_term);
+    nearest_set_search_file (& nearest, file_name);
+
+    search_packages (& nearest);
+    return strdup (nearest.nearest);
 }
 
 #ifdef TEST

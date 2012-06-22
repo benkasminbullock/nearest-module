@@ -1,0 +1,8 @@
+nearest-module.h:	nearest-module.c
+	cfunctions -inc nearest-module.c
+
+nearest-module:	nearest-module.c nearest-module.h
+	cc -g -Wall -O -o $@ -DTEST nearest-module.c -lz
+
+clean:
+	-rm -f nearest-module

@@ -1,3 +1,8 @@
 02packages*
 nearest-module
 nearest-module.h
+Nearest.bs
+Nearest.c
+ppport.h
+Makefile
+lib/CPAN/Nearest.pod
