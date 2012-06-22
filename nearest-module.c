@@ -132,6 +132,7 @@ static void nearest_compare_line (nearest_module_t * nearest)
     if (d < nearest->distance) {
         nearest->distance = d;
         strncpy (nearest->nearest, nearest->buf, l);
+        nearest->nearest[l] = '\0';
     }
     return;
 }
@@ -259,8 +260,15 @@ static void print_result (nearest_module_t * nearest)
 int main (int argc, char ** argv)
 {
     nearest_module_t nearest = {0};
-
-    nearest_set_search_term (& nearest, "Lingua::Stop::Weirds");
+    char * st;
+    
+    if (argc < 2) {
+        st = "Lingua::Stop::Weirds";
+    }
+    else {
+        st = argv[1];
+    }
+    nearest_set_search_term (& nearest, st);
     nearest_set_search_file (& nearest, "02packages.details.txt");
 
     search_packages (& nearest);
