@@ -3,7 +3,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my $pm = 'lib/CPAN/Nearest.pm';
-my $repo = 'https://github.com/benkasminbullock/CPAN-Nearest';
+my $repo = 'https://github.com/benkasminbullock/nearest-module';
 
 WriteMakefile (
     NAME => 'CPAN::Nearest',
