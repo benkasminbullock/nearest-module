@@ -71,6 +71,7 @@ static int distance (const char * word1,
 {
     int matrix[len1 + 1][len2 + 1];
     int i;
+
     for (i = 0; i <= len1; i++) {
         matrix[i][0] = i;
     }

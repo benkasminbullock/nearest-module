@@ -6,3 +6,4 @@ Nearest.c
 ppport.h
 Makefile
 lib/CPAN/Nearest.pod
+leven-with-max

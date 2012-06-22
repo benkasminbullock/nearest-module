@@ -4,5 +4,12 @@ nearest-module.h:	nearest-module.c
 nearest-module:	nearest-module.c nearest-module.h
 	cc -g -Wall -O -o $@ -DTEST nearest-module.c -lz
 
+leven-with-max:     leven-with-max.c
+	cc -g -Wall -O -o $@ leven-with-max.c
+
 clean:
 	-rm -f nearest-module
+
+# Local variables:
+# mode: makefile
+# End:
