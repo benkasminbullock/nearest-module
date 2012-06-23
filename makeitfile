@@ -2,12 +2,12 @@ all:	nearest-module.h edit-distance.h
 
 CFLAGS=-g -Wall -O
 
-NMOBJS=nearest-module-test.o edit-distance.o
+NMOBJS=nearest-module-test.o edit-distance-test.o
 
 nearest-module:	$(NMOBJS)
 	cc $(CFLAGS) -o $@ $(NMOBJS) -lz
 
-LWMOBJS=leven-with-max.o edit-distance.o
+LWMOBJS=leven-with-max.o edit-distance-test.o
 
 leven-with-max:     $(LWMOBJS)
 	cc $(CFLAGS) -o $@ $(LWMOBJS)
@@ -15,7 +15,7 @@ leven-with-max:     $(LWMOBJS)
 nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
 	cc -c $(CFLAGS) -o $@ -DTEST nearest-module.c
 
-edit-distance.o:	edit-distance.c edit-distance.h
+edit-distance-test.o:	edit-distance.c edit-distance.h
 	cc -c $(CFLAGS) -o $@ edit-distance.c
 
 leven-with-max.o:	leven-with-max.c edit-distance.h

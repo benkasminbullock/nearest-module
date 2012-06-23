@@ -24,4 +24,16 @@ on a Unix-like system. This may be specified as the file name. To
 retrieve the results faster, specify an uncompressed version of this
 file.
 
+=head1 STANDALONE PROGRAM
+
+The distribution includes a standalone program called "nearest-module"
+as shown in L<this blog
+entry|http://blogs.perl.org/users/ben_bullock/2012/06/find-a-misspelt-module-name.html>. To
+use this program, edit the file F<nearest-module.c> in the top level
+of the distribution to point to the name of the file
+F<02packages.details.txt> or F<02packages.details.txt.gz> on your
+system, and compile it with
+
+    make -f makeitfile nearest-module
+
 [% INCLUDE "author" %]
