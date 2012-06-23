@@ -29,8 +29,9 @@ int distance (const char * word1,
         matrix[0][j] = j;
     }
 
-    /* If "max" is small enough to make a difference, fill in every
-       cell of the matrix with a "too big" number. */
+    /* If "max" is small enough to make a difference, fill in the
+       empty cells of the matrix (the * cells in the graphic above)
+       with a "too big" number. */
     if (max < len1 || max < len2) {
         for (i = 1; i <= len1; i++) {
             for (j = 1; j <= len2; j++) {
@@ -64,9 +65,15 @@ int distance (const char * word1,
 
             c2 = word2[j-1];
             if (c1 == c2) {
+                /* The character at position i in word1 is the same as
+                   the character at position j in word2. */
                 matrix[i][j] = matrix[i-1][j-1];
             }
             else {
+                /* The character at position i in word1 is not the
+                   same as the character at position j in word2, so
+                   work out what the minimum cost for getting to cell
+                   i, j is. */
                 int delete;
                 int insert;
                 int substitute;
