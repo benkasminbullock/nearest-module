@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdio.h>
 /* For INT_MAX */
 #include <limits.h>
 #include "edit-distance.h"
@@ -40,6 +42,7 @@ int distance (const char * word1,
         /* The previously-filled-in column of the matrix. */
         int prev;
 
+        c1 = word1[i-1];
         min_j = 1;
         if (i > max) {
             min_j = i - max;
@@ -48,7 +51,6 @@ int distance (const char * word1,
         if (len2 > max + i) {
             max_j = max + i;
         }
-        c1 = word1[i-1];
         col_min = INT_MAX;
         next = i % 2;
         if (next == 1) {
@@ -57,10 +59,11 @@ int distance (const char * word1,
         else {
             prev = 1;
         }
-        matrix[0][next] = i;
+        matrix[next][0] = i;
         /* Loop over rows. */
         for (j = 1; j <= len2; j++) {
             if (j < min_j || j > max_j) {
+                /* Put a large value in there. */
                 matrix[next][j] = max + 1;
             }
             else {

@@ -86,6 +86,11 @@ static void nearest_compare_line (nearest_module_t * nearest)
 
     d = distance (b, l, nearest->search_term, nearest->search_len,
                   nearest->distance);
+    /*
+    printf ("%d ---> '%s' %d '%s' %d\n", d, 
+            nearest->search_term, nearest->search_len,
+            nearest->buf, l);
+    */
     if (d < nearest->distance) {
         if (nearest->verbose) {
             printf ("%s (%d) is nearer than %d.\n", nearest->buf, d,
@@ -185,7 +190,6 @@ nearest_gz_get_line (nearest_module_t * nearest)
  more_bytes:
 
     remaining = GZ_BUFFER_LEN - nearest->gz_buffer_at;
-    //    printf ("offset: %d\n", nearest->gz_buffer_at);
     for (i = 0; i < remaining; i++) {
         nearest->buf[bt] = nearest->gz_buffer[nearest->gz_buffer_at];
         /* If there is a carriage return in the stuff read so far, we
@@ -205,7 +209,6 @@ nearest_gz_get_line (nearest_module_t * nearest)
         }
         goto more_bytes;
     }
-    //    nearest->buf_len = bt;
     return 1;
 }
 
