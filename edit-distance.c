@@ -8,37 +8,24 @@ int distance (const char * word1,
               int len2,
               int max)
 {
-    int matrix[len1 + 1][len2 + 1];
+    int matrix[2][len2 + 1];
     int i;
     int j;
 
     /*
-      Initialize the 0 row and column of "matrix":
+      Initialize the 0 row of "matrix".
 
-        0  1  2  3
-        1  *  *  *
-        2  *  *  *
-        3  *  *  *
+        0  
+        1  
+        2  
+        3  
 
      */
 
-    for (i = 0; i <= len1; i++) {
-        matrix[i][0] = i;
-    }
     for (j = 0; j <= len2; j++) {
         matrix[0][j] = j;
     }
 
-    /* If "max" is small enough to make a difference, fill in the
-       empty cells of the matrix (the * cells in the graphic above)
-       with a "too big" number. */
-    if (max < len1 || max < len2) {
-        for (i = 1; i <= len1; i++) {
-            for (j = 1; j <= len2; j++) {
-                matrix[i][j] = max + 1;
-            }
-        }
-    }
     /* Loop over column. */
     for (i = 1; i <= len1; i++) {
         char c1;
@@ -48,6 +35,10 @@ int distance (const char * word1,
         int max_j;
         /* The smallest value of the matrix in the ith column. */
         int col_min;
+        /* The next column of the matrix to fill in. */
+        int next;
+        /* The previously-filled-in column of the matrix. */
+        int prev;
 
         min_j = 1;
         if (i > max) {
@@ -59,41 +50,54 @@ int distance (const char * word1,
         }
         c1 = word1[i-1];
         col_min = INT_MAX;
-        /* Loop over row. */
-        for (j = min_j; j <= max_j; j++) {
-            char c2;
-
-            c2 = word2[j-1];
-            if (c1 == c2) {
-                /* The character at position i in word1 is the same as
-                   the character at position j in word2. */
-                matrix[i][j] = matrix[i-1][j-1];
+        next = i % 2;
+        if (next == 1) {
+            prev = 0;
+        }
+        else {
+            prev = 1;
+        }
+        matrix[0][next] = i;
+        /* Loop over rows. */
+        for (j = 1; j <= len2; j++) {
+            if (j < min_j || j > max_j) {
+                matrix[next][j] = max + 1;
             }
             else {
-                /* The character at position i in word1 is not the
-                   same as the character at position j in word2, so
-                   work out what the minimum cost for getting to cell
-                   i, j is. */
-                int delete;
-                int insert;
-                int substitute;
-                int minimum;
+                char c2;
 
-                delete = matrix[i-1][j] + 1;
-                insert = matrix[i][j-1] + 1;
-                substitute = matrix[i-1][j-1] + 1;
-                minimum = delete;
-                if (insert < minimum) {
-                    minimum = insert;
+                c2 = word2[j-1];
+                if (c1 == c2) {
+                    /* The character at position i in word1 is the same as
+                       the character at position j in word2. */
+                    matrix[next][j] = matrix[prev][j-1];
                 }
-                if (substitute < minimum) {
-                    minimum = substitute;
+                else {
+                    /* The character at position i in word1 is not the
+                       same as the character at position j in word2, so
+                       work out what the minimum cost for getting to cell
+                       i, j is. */
+                    int delete;
+                    int insert;
+                    int substitute;
+                    int minimum;
+
+                    delete = matrix[prev][j] + 1;
+                    insert = matrix[next][j-1] + 1;
+                    substitute = matrix[prev][j-1] + 1;
+                    minimum = delete;
+                    if (insert < minimum) {
+                        minimum = insert;
+                    }
+                    if (substitute < minimum) {
+                        minimum = substitute;
+                    }
+                    matrix[next][j] = minimum;
                 }
-                matrix[i][j] = minimum;
             }
             /* Find the minimum value in the ith column. */
-            if (matrix[i][j] < col_min) {
-                col_min = matrix[i][j];
+            if (matrix[next][j] < col_min) {
+                col_min = matrix[next][j];
             }
         }
         if (col_min > max) {
@@ -103,6 +107,6 @@ int distance (const char * word1,
             return max + 1;
         }
     }
-    return matrix[len1][len2];
+    return matrix[len1 % 2][len2];
 }
 
