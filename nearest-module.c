@@ -320,7 +320,7 @@ int main (int argc, char ** argv)
         st = "Lingua::Stop::Weirds";
     }
     nearest_set_search_term (& nearest, st);
-    nearest_set_search_file (& nearest, "02packages.details.txt");
+    nearest_set_search_file (& nearest, "02packages.details.txt.gz");
 
     search_packages (& nearest);
     print_result (& nearest);
