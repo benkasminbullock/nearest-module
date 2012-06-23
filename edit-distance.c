@@ -12,14 +12,25 @@ int distance (const char * word1,
     int i;
     int j;
 
+    /*
+      Initialize the 0 row and column of "matrix":
+
+        0  1  2  3
+        1  *  *  *
+        2  *  *  *
+        3  *  *  *
+
+     */
+
     for (i = 0; i <= len1; i++) {
         matrix[i][0] = i;
     }
     for (j = 0; j <= len2; j++) {
         matrix[0][j] = j;
     }
-    /* If the maximum is small enough to make any difference, fill in
-       every cell of the matrix with a "too big" number. */
+
+    /* If "max" is small enough to make a difference, fill in every
+       cell of the matrix with a "too big" number. */
     if (max < len1 || max < len2) {
         for (i = 1; i <= len1; i++) {
             for (j = 1; j <= len2; j++) {
@@ -27,13 +38,14 @@ int distance (const char * word1,
             }
         }
     }
+    /* Loop over column. */
     for (i = 1; i <= len1; i++) {
         char c1;
-        /* The bottom of the column. */
+        /* The first value to consider of the ith column. */
         int min_j;
-        /* The top of the column. */
+        /* The last value to consider of the ith column. */
         int max_j;
-        /* The smallest value of the matrix in column i. */
+        /* The smallest value of the matrix in the ith column. */
         int col_min;
 
         min_j = 1;
@@ -44,9 +56,9 @@ int distance (const char * word1,
         if (len2 > max + i) {
             max_j = max + i;
         }
-        //        printf ("%d - %d\n", min_j, max_j);
         c1 = word1[i-1];
         col_min = INT_MAX;
+        /* Loop over row. */
         for (j = min_j; j <= max_j; j++) {
             char c2;
 
@@ -72,20 +84,15 @@ int distance (const char * word1,
                 }
                 matrix[i][j] = minimum;
             }
+            /* Find the minimum value in the ith column. */
             if (matrix[i][j] < col_min) {
                 col_min = matrix[i][j];
             }
         }
         if (col_min > max) {
-            /* All the elements of this column are greater than the
-               maximum. */
-            /*
-            printf ("All too big at column %d.\n", i);
-            for (j = min_j; j <= max_j; j++) {
-                printf ("%d:%d ", j, matrix[i][j]);
-            }
-            printf ("\n");
-            */
+            /* All the elements of the ith column are greater than the
+               maximum, so no match less than or equal to max can be
+               found by looking at succeeding columns. */
             return max + 1;
         }
     }
