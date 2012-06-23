@@ -57,7 +57,7 @@ int distance (const char * word1,
         else {
             prev = 1;
         }
-        matrix[0][next] = i;
+        matrix[next][0] = i;
         /* Loop over rows. */
         for (j = 1; j <= len2; j++) {
             if (j < min_j || j > max_j) {
