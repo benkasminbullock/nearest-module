@@ -1,9 +1,15 @@
 02packages*
+# Binaries
+leven-with-max
 nearest-module
+# Auto-generated
 nearest-module.h
+edit-distance.h
+# Perl outputs
 Nearest.bs
 Nearest.c
-ppport.h
 Makefile
+# Copied file
+ppport.h
+# ./build.pl output
 lib/CPAN/Nearest.pod
-leven-with-max

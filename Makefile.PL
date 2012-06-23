@@ -20,6 +20,6 @@ WriteMakefile (
             bugtracker => "$repo/issues",
         },
     },
-    OBJECT => 'nearest-module.o Nearest.o',
+    OBJECT => 'edit-distance.o nearest-module.o Nearest.o',
     LIBS => ['-lz',],
 );

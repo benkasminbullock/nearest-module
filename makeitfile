@@ -1,14 +1,36 @@
+all:	nearest-module.h edit-distance.h
+
+CFLAGS=-g -Wall -O
+
+NMOBJS=nearest-module-test.o edit-distance.o
+
+nearest-module:	$(NMOBJS)
+	cc $(CFLAGS) -o $@ $(NMOBJS) -lz
+
+LWMOBJS=leven-with-max.o edit-distance.o
+
+leven-with-max:     $(LWMOBJS)
+	cc $(CFLAGS) -o $@ $(LWMOBJS)
+
+nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
+	cc -c $(CFLAGS) -o $@ -DTEST nearest-module.c
+
+edit-distance.o:	edit-distance.c nearest-module.h edit-distance.h
+	cc -c $(CFLAGS) -o $@ edit-distance.c
+
+leven-with-max.o:	leven-with-max.c edit-distance.h
+	cc -c $(CFLAGS) -o $@ leven-with-max.c
+
 nearest-module.h:	nearest-module.c
 	cfunctions -inc nearest-module.c
 
-nearest-module:	nearest-module.c nearest-module.h
-	cc -g -Wall -O -o $@ -DTEST nearest-module.c -lz
-
-leven-with-max:     leven-with-max.c
-	cc -g -Wall -O -o $@ leven-with-max.c
+edit-distance.h:	edit-distance.c
+	cfunctions -inc edit-distance.c
 
 clean:
-	-rm -f nearest-module nearest-module.h leven-with-max
+	-rm -f nearest-module leven-with-max \
+	nearest-module.h edit-distance.h \
+	$(LWMOBJS) $(NMOBJS)
 
 # Local variables:
 # mode: makefile

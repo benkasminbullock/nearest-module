@@ -7,3 +7,5 @@ nearest-module.h
 Nearest.xs
 ppport.h
 t/CPAN-Nearest.t
+edit-distance.c
+edit-distance.h
