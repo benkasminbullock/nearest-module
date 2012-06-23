@@ -1,6 +1,6 @@
 all:	nearest-module.h edit-distance.h
 
-CFLAGS=-g -Wall -O
+CFLAGS=-g -Wall# -O
 
 NMOBJS=nearest-module-test.o edit-distance-test.o
 
