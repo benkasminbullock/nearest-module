@@ -8,6 +8,44 @@ CPAN::Nearest - find the nearest module to a given name.
     my $module = search ('02package.details.txt', 'Lingua::Stop::Wars');
     # Now $module = "Lingua::StopWords";
 
+=head1 DESCRIPTION
+
+This module provides a way of searching for CPAN modules whose name
+may be misspelt. For example, if a user accidentally types
+"Lingua::Stopwords" when looking for the module "Lingua::StopWords",
+the common cpan clients will not be able to function:
+
+    cpan Lingua::Stopwords
+
+gives
+
+    Warning: Cannot install Lingua::Stopwords, don't know what it is.
+    Try the command
+
+    i /Lingua::Stopwords/
+
+    to find objects with matching identifiers.
+
+and
+
+    cpanm Lingua::Stopwords
+
+gives
+
+    ! Finding Lingua::Stopwords on cpanmetadb failed.
+    ! Finding Lingua::Stopwords on search.cpan.org failed.
+    ! Finding Lingua::Stopwords () on mirror http://www.cpan.org failed.
+    ! Couldn't find module or a distribution Lingua::Stopwords ()
+
+CPAN::Nearest supplies a spelling-mistake tolerant search for the most
+similar name, intended for people making tools like C<cpan>, C<cpanm>,
+C<pm-uninstall>, and anything else which needs to use the CPAN
+packages list. CPAN::Nearest was written to be fast enough for
+practical use, and without dependencies.
+
+CPAN::Nearest was inspired by the helpful "git" version control
+system, which provides suggestions for spelling mistakes.
+
 =head1 FUNCTIONS
 
 =head2 search
@@ -29,6 +67,13 @@ on a Unix-like system. This may be specified as the file name. This
 module can read either a compressed or uncompressed version. There is
 a speed increase of 10-20% when an uncompressed file is used.
 
+=head1 FILES
+
+Users of the C<cpan> utility supplied with Perl may find the file
+listing the CPAN modules in
+F<~/.cpan/sources/modules/02packages.details.txt.gz>. Others can
+download the file from the directory F</modules/> of any CPAN mirror. 
+
 =head1 STANDALONE PROGRAM
 
 The distribution includes a standalone program called "nearest-module"
@@ -40,5 +85,17 @@ F<02packages.details.txt> or F<02packages.details.txt.gz> on your
 system, and compile it with
 
     make -f makeitfile nearest-module
+
+It is run with the name of a single module:
+
+    ./nearest-module Lingo::Jingo::Mojo
+    Closest to 'Lingo::Jingo::Mojo' is 'Lingua::JA::Moji'.
+
+There is a C<-v> option to view candidate modules:
+
+    $ ./nearest-module -v Lingo::Jingo::Mojo
+    Games::Bingo::Bot (9) is nearer than 10.
+    Lingua::JA::Moji (7) is nearer than 9.
+    Closest to 'Lingo::Jingo::Mojo' is 'Lingua::JA::Moji'.
 
 [% INCLUDE "author" %]
