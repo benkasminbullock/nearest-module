@@ -22,6 +22,10 @@
 
 #define MAXLEN 0x400
 
+/* The length of the buffer used to read the file when the file is
+   compressed. Setting this to 0x10000 made the program no faster, and
+   setting it to 0x100000 made the program slower. */
+
 #define GZ_BUFFER_LEN 0x1000
 
 typedef struct nearest_module
@@ -164,6 +168,7 @@ nearest_close_file (nearest_module_t * nearest)
 {
     if (nearest->is_gz) {
         gzclose (nearest->gzfile);
+        free (nearest->gz_buffer);
     }
     else {
         fclose (nearest->file);
