@@ -1,8 +1,10 @@
 all:	nearest-module.h edit-distance.h
 
-CFLAGS=-g -Wall -O
+CFLAGS=-g -Wall -O #-pg #-fprofile-arcs -ftest-coverage -pg
 
 NMOBJS=nearest-module-test.o edit-distance-test.o
+
+NMAOBJS=nearest-module-test-alphabet.o edit-distance-test.o
 
 nearest-module:	$(NMOBJS)
 	cc $(CFLAGS) -o $@ $(NMOBJS) -lz
@@ -12,11 +14,8 @@ LWMOBJS=leven-with-max.o edit-distance-test.o
 leven-with-max:     $(LWMOBJS)
 	cc $(CFLAGS) -o $@ $(LWMOBJS)
 
-#nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
-#	cc -c $(CFLAGS) -o $@ -DTEST nearest-module.c
-
 nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
-	cc -c $(CFLAGS) -o $@ -DTEST -DALPHABET nearest-module.c
+	cc -c $(CFLAGS) -o $@ -DTEST -DNOALPHABET nearest-module.c
 
 edit-distance-test.o:	edit-distance.c edit-distance.h
 	cc -c $(CFLAGS) -o $@ edit-distance.c
@@ -33,7 +32,8 @@ edit-distance.h:	edit-distance.c
 clean:
 	-rm -f nearest-module leven-with-max \
 	nearest-module.h edit-distance.h \
-	$(LWMOBJS) $(NMOBJS)
+	nearest-module-alphabet \
+	$(LWMOBJS) $(NMOBJS) $(NMAOBJS)
 
 # Local variables:
 # mode: makefile
