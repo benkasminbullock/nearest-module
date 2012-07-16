@@ -12,8 +12,11 @@ LWMOBJS=leven-with-max.o edit-distance-test.o
 leven-with-max:     $(LWMOBJS)
 	cc $(CFLAGS) -o $@ $(LWMOBJS)
 
+#nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
+#	cc -c $(CFLAGS) -o $@ -DTEST nearest-module.c
+
 nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
-	cc -c $(CFLAGS) -o $@ -DTEST nearest-module.c
+	cc -c $(CFLAGS) -o $@ -DTEST -DALPHABET nearest-module.c
 
 edit-distance-test.o:	edit-distance.c edit-distance.h
 	cc -c $(CFLAGS) -o $@ edit-distance.c
