@@ -6,6 +6,7 @@
 
 #include "zlib.h"
 
+#include "text-fuzzy.h"
 #include "nearest-module.h"
 
 MODULE= CPAN::Nearest PACKAGE=CPAN::Nearest

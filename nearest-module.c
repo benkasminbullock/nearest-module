@@ -11,8 +11,9 @@
 /* for isspace. */
 #include <ctype.h>
 
+#include "text-fuzzy.h"
 #include "nearest-module.h"
-#include "edit-distance.h"
+#include "edit-distance-char.h"
 
 
 #ifdef HEADER
@@ -29,8 +30,6 @@
 
 #define GZ_BUFFER_LEN 0x1000
 
-static int max_unique_characters = 45;
-
 typedef struct nearest_module
 {
     /* The file to look at. */
@@ -44,11 +43,6 @@ typedef struct nearest_module
     int verbose : 1;
     /* Actually found something? */
     int found : 1;
-    /* Use alphabet filter? */
-    int no_alphabet_filter : 1;
-
-    int use_alphabet : 1;
-
     /* The term to search for. */
     const char * search_term;
     /* The length of the search term. */
@@ -59,12 +53,10 @@ typedef struct nearest_module
     int buf_len;
     /* The nearest module to the search term. */
     char nearest[MAXLEN];
-    /* The edit distance from "search_term" to "nearest". */
-    int distance;
     /* The name of the file to read from. */
     const char * file_name;
-    /* Alphabet */
-    int alphabet[0x100];
+    /* Transitional object. */
+    text_fuzzy_t tf;
 }
 nearest_module_t;
 
@@ -82,62 +74,33 @@ static void fail (int test, const char * message, ...)
     return;
 }
 
-static void nearest_compare_line (nearest_module_t * nearest)
+static int nearest_compare_line (nearest_module_t * nearest)
 {
-    /* The edit distance between "nearest->search_term" and the
-       truncated version of "nearest->buf". */
-    int d;
     /* The length of "nearest->buf" after truncation. */
     int l;
-    /* Shorthand for "nearest->buf". */
-    char * b;
+    text_fuzzy_string_t b;
 
+    b.text = nearest->buf;
+    /* Compute the length. */
+    for (l = 0; !isspace (b.text[l]) && b.text[l]; l++)
+	;
+    b.length = l;
+    /* This is only necessary for the printf below, the edit
+       distance routines completely ignore this, and only use "l" for
+       the length. */
+    b.text[l] = '\0';
 
-    b = nearest->buf;
-    if (nearest->use_alphabet) {
-        if (nearest->no_alphabet_filter) {
-            for (l = 0; !isspace (b[l]) && b[l]; l++)
-                ;
-        }
-        else {
-            int alphabet_misses;
-            alphabet_misses = 0;
-            /* Truncate "nearest->buf" at the first space character, or \0. */
-            for (l = 0; !isspace (b[l]) && b[l]; l++) {
-                int a = (unsigned char) b[l];
-                if (! nearest->alphabet[a]) {
-                    alphabet_misses++;
-                    if (alphabet_misses > nearest->distance) {
-                        return;
-                    }
-                }
-            }
-        }
-    }
-    else {
-        for (l = 0; !isspace (b[l]) && b[l]; l++)
-            ;
-    }
-    b[l] = '\0';
-
-    d = distance (b, l, nearest->search_term, nearest->search_len,
-                  nearest->distance);
-    /*
-    printf ("%d ---> '%s' %d '%s' %d\n", d, 
-            nearest->search_term, nearest->search_len,
-            nearest->buf, l);
-    */
-    if (d < nearest->distance) {
-        if (nearest->verbose) {
-            printf ("%s (%d) is nearer than %d.\n", nearest->buf, d,
-                    nearest->distance);
-        }
-        nearest->found = 1;
-        nearest->distance = d;
+    TEXT_FUZZY (compare_single (& nearest->tf, & b));
+    if (nearest->tf.found) {
+	nearest->found = 1;
+	if (nearest->verbose) {
+            printf ("%s (%d) is nearer.\n", b.text, nearest->tf.distance);
+	}
+	nearest->tf.max_distance = nearest->tf.distance;
         strncpy (nearest->nearest, nearest->buf, l);
         nearest->nearest[l] = '\0';
     }
-    return;
+    return 0;
 }
 
 static int
@@ -164,6 +127,8 @@ nearest_gz_get_bytes (nearest_module_t * nearest)
     nearest->gz_buffer_at = 0;
     return 1;
 }
+
+/* Open the file for reading. */
 
 static void
 nearest_open_file (nearest_module_t * nearest)
@@ -195,6 +160,8 @@ nearest_open_file (nearest_module_t * nearest)
     return;
 }
 
+/* Close the file and free memory if necessary. */
+
 static void
 nearest_close_file (nearest_module_t * nearest)
 {
@@ -207,6 +174,8 @@ nearest_close_file (nearest_module_t * nearest)
     }
     return;
 }
+
+/* Get the lines from the file. */
 
 static int
 nearest_gz_get_line (nearest_module_t * nearest)
@@ -274,10 +243,12 @@ static void search_packages (nearest_module_t * nearest)
     static int more_lines;
     nearest_open_file (nearest);
     /* Don't use INT_MAX here or get overflow. */
-    nearest->distance = nearest->search_len + 1;
-    if (nearest->search_len > max_sane_distance) {
-        nearest->distance = max_sane_distance;
+    nearest->tf.distance = nearest->tf.text.length + 1;
+    if (nearest->tf.distance > max_sane_distance) {
+	nearest->tf.distance = max_sane_distance;
     }
+    printf ("Initial distance is %d\n", nearest->tf.distance);
+    nearest->tf.max_distance = max_sane_distance;
     more_lines = 1;
     while (more_lines) {
         more_lines = nearest_get_line (nearest);
@@ -287,35 +258,16 @@ static void search_packages (nearest_module_t * nearest)
     return;
 }
 
-static void
+static int
 nearest_set_search_term (nearest_module_t * nearest,
                          const char * search_term)
 {
-    int unique_characters;
-    int i;
-    nearest->search_term = search_term;
-    nearest->search_len = strlen (nearest->search_term);
-    if (nearest->use_alphabet) {
-        for (i = 0; i < 0x100; i++) {
-            nearest->alphabet[i] = 0;
-        }
-        unique_characters = 0;
-        for (i = 0; i < nearest->search_len; i++) {
-            int c;
-            c = (unsigned char) search_term[i];
-            if (! nearest->alphabet[c]) {
-                unique_characters++;
-                nearest->alphabet[c] = 1;
-            }
-        }
-        if (unique_characters > max_unique_characters) {
-            nearest->no_alphabet_filter = 1;
-        }
-        else {
-            nearest->no_alphabet_filter = 0;
-        }
+    nearest->tf.text.text = (char *) search_term;
+    nearest->tf.text.length = strlen (nearest->tf.text.text);
+    if (nearest->tf.use_alphabet) {
+	TEXT_FUZZY (generate_alphabet (& nearest->tf));
     }
-    return;
+    return 0;
 }
 
 static void
@@ -331,9 +283,7 @@ cpan_nearest_search (char * file_name, char * search_term)
 {
     nearest_module_t nearest = {0};
 
-    /* Switch on the alphabet filter. */
-    nearest.use_alphabet = 1;
-
+    nearest.tf.use_alphabet = 1;
     nearest_set_search_term (& nearest, search_term);
     nearest_set_search_file (& nearest, file_name);
 
@@ -351,12 +301,13 @@ cpan_nearest_search (char * file_name, char * search_term)
 static void print_result (nearest_module_t * nearest)
 {
     if (nearest->found) {
-        if (nearest->distance == 0) {
-            printf ("Found '%s'\n", nearest->nearest);
+        if (nearest->tf.distance == 0) {
+            printf ("Found exact match '%s'\n", nearest->nearest);
         }
         else {
-            printf ("Closest to '%s' is '%s'.\n", nearest->search_term,
-                    nearest->nearest);
+            printf ("Closest to '%s' is '%s' (distance %d).\n",
+		    nearest->tf.text.text,
+                    nearest->nearest, nearest->tf.distance);
         }
     }
     else {
@@ -364,25 +315,34 @@ static void print_result (nearest_module_t * nearest)
     }
     return;
 }
-
+/*
 const char * file_name =
     "/home/ben/.cpan/sources/modules/02packages.details.txt.gz";
+*/
+
+const char * file_name =
+    "/home/ben/.cpan/sources/modules/02packages.details.txt";
 
 int main (int argc, char ** argv)
 {
     nearest_module_t nearest = {0};
     char * st;
+    st = "Lingua::Stop::Weirds";
     if (argc > 1) {
         while (argc) {
             char * arg = * argv;
             if (strcmp (arg, "-v") == 0) {
                 nearest.verbose = 1;
             }
+
+	    /* Not using the alphabet does not really serve any
+	       purpose, it runs twice as fast. */
+
             else if (strcmp (arg, "-a") == 0) {
                 if (nearest.verbose) {
                     printf ("Using alphabet.\n");
                 }
-                nearest.use_alphabet = 1;
+                nearest.tf.use_alphabet = 1;
             }
             else {
                 st = arg;
@@ -390,9 +350,6 @@ int main (int argc, char ** argv)
             argc--;
             argv++;
         }
-    }
-    else {
-        st = "Lingua::Stop::Weirds";
     }
     nearest_set_search_term (& nearest, st);
     nearest_set_search_file (& nearest, file_name);

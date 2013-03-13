@@ -1,4 +1,5 @@
 package CPAN::Nearest;
+use Text::Fuzzy '0.08';
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw/search/;

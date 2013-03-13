@@ -1,8 +1,13 @@
-all:	nearest-module.h edit-distance.h
+COPIEDFILES= \
+	edit-distance-int.c edit-distance-int.h \
+	edit-distance-char.h edit-distance-char.c \
+	text-fuzzy.c text-fuzzy.h
+
+all:	nearest-module.h $(COPIEDFILES)
 
 CFLAGS=-g -Wall -O #-pg #-fprofile-arcs -ftest-coverage -pg
 
-NMOBJS=nearest-module-test.o edit-distance-test.o
+NMOBJS=nearest-module-test.o edit-distance-char.o edit-distance-int.o text-fuzzy.o
 
 NMAOBJS=nearest-module-test-alphabet.o edit-distance-test.o
 
@@ -17,8 +22,14 @@ leven-with-max:     $(LWMOBJS)
 nearest-module-test.o:	nearest-module.c nearest-module.h edit-distance.h
 	cc -c $(CFLAGS) -o $@ -DTEST -DNOALPHABET nearest-module.c
 
-edit-distance-test.o:	edit-distance.c edit-distance.h
-	cc -c $(CFLAGS) -o $@ edit-distance.c
+edit-distance-test.o:	edit-distance-char.c edit-distance-char.h
+	cc -c $(CFLAGS) -o $@ edit-distance-char.c
+
+edit-distance-char.o:	edit-distance-char.c edit-distance-char.h text-fuzzy.h
+	cc -c $(CFLAGS) -o $@ edit-distance-char.c
+
+edit-distance-int.o:	edit-distance-int.c edit-distance-int.h text-fuzzy.h
+	cc -c $(CFLAGS) -o $@ edit-distance-int.c
 
 leven-with-max.o:	leven-with-max.c edit-distance.h
 	cc -c $(CFLAGS) -o $@ leven-with-max.c
@@ -26,14 +37,32 @@ leven-with-max.o:	leven-with-max.c edit-distance.h
 nearest-module.h:	nearest-module.c
 	cfunctions -inc nearest-module.c
 
-edit-distance.h:	edit-distance.c
-	cfunctions -inc edit-distance.c
+FUZZYDIR=/home/ben/projects/Text-Fuzzy
+
+edit-distance-char.c:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
+
+edit-distance-char.h:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
+
+edit-distance-int.c:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
+
+edit-distance-int.h:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
+
+text-fuzzy.c:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
+
+text-fuzzy.h:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
 
 clean:
 	-rm -f nearest-module leven-with-max \
 	nearest-module.h edit-distance.h \
 	nearest-module-alphabet \
-	$(LWMOBJS) $(NMOBJS) $(NMAOBJS)
+	$(LWMOBJS) $(NMOBJS) $(NMAOBJS) \
+	$(COPIEDFILES)
 
 # Local variables:
 # mode: makefile
