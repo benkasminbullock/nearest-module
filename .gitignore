@@ -13,3 +13,5 @@ Makefile
 ppport.h
 # ./build.pl output
 lib/CPAN/Nearest.pod
+# Devel::CheckLib guff.
+inc/*

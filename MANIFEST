@@ -1,3 +1,4 @@
+inc/Devel/CheckLib.pm
 lib/CPAN/Nearest.pm
 lib/CPAN/Nearest.pod
 Makefile.PL
@@ -7,5 +8,9 @@ nearest-module.h
 Nearest.xs
 ppport.h
 t/CPAN-Nearest.t
-edit-distance.c
-edit-distance.h
+edit-distance-int.c
+edit-distance-int.h
+edit-distance-char.c
+edit-distance-char.h
+text-fuzzy.c
+text-fuzzy.h

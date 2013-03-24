@@ -1,0 +1,5 @@
+0.08
+
+The algorithms of the module are now in Text::Fuzzy, which also
+includes speedups not present in version 0.07 of this module.
+
