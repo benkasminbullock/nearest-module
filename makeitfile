@@ -3,7 +3,7 @@ COPIEDFILES= \
 	edit-distance-char.h edit-distance-char.c \
 	edit-distance-int-trans.c edit-distance-int-trans.h \
 	edit-distance-char-trans.h edit-distance-char-trans.c \
-	text-fuzzy.c text-fuzzy.h
+	text-fuzzy.c text-fuzzy.h config.h
 
 all:	nearest-module.h $(COPIEDFILES)
 
@@ -24,19 +24,19 @@ leven-with-max:     $(LWMOBJS)
 nearest-module-test.o:	nearest-module.c nearest-module.h text-fuzzy.h
 	cc -c $(CFLAGS) -o $@ -DTEST -DNOALPHABET nearest-module.c
 
-edit-distance-test.o:	edit-distance-char.c edit-distance-char.h
+edit-distance-test.o:	edit-distance-char.c edit-distance-char.h config.h
 	cc -c $(CFLAGS) -o $@ edit-distance-char.c
 
-edit-distance-char.o:	edit-distance-char.c edit-distance-char.h text-fuzzy.h
+edit-distance-char.o:	edit-distance-char.c edit-distance-char.h text-fuzzy.h config.h
 	cc -c $(CFLAGS) -o $@ edit-distance-char.c
 
-edit-distance-int.o:	edit-distance-int.c edit-distance-int.h text-fuzzy.h
+edit-distance-int.o:	edit-distance-int.c edit-distance-int.h text-fuzzy.h config.h
 	cc -c $(CFLAGS) -o $@ edit-distance-int.c
 
-edit-distance-char-trans.o:	edit-distance-char-trans.c edit-distance-char-trans.h text-fuzzy.h
+edit-distance-char-trans.o:	edit-distance-char-trans.c edit-distance-char-trans.h text-fuzzy.h config.h
 	cc -c $(CFLAGS) -o $@ edit-distance-char-trans.c
 
-edit-distance-int-trans.o:	edit-distance-int-trans.c edit-distance-int-trans.h text-fuzzy.h
+edit-distance-int-trans.o:	edit-distance-int-trans.c edit-distance-int-trans.h text-fuzzy.h config.h
 	cc -c $(CFLAGS) -o $@ edit-distance-int-trans.c
 
 leven-with-max.o:	leven-with-max.c edit-distance.h
@@ -75,6 +75,9 @@ text-fuzzy.c:	$(FUZZYDIR)/$@
 	cp -f $(FUZZYDIR)/$@ $@
 
 text-fuzzy.h:	$(FUZZYDIR)/$@
+	cp -f $(FUZZYDIR)/$@ $@
+
+config.h:	$(FUZZYDIR)/$@
 	cp -f $(FUZZYDIR)/$@ $@
 
 clean:

@@ -236,7 +236,7 @@ static int search_packages (nearest_module_t * nearest)
 {
     static int max_sane_distance = 10;
     static int more_lines;
-    int max_distance;
+    int max;
 
     nearest_open_file (nearest);
     /* Don't use INT_MAX here or get overflow. */

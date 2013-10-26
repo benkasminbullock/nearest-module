@@ -15,3 +15,6 @@ ppport.h
 lib/CPAN/Nearest.pod
 # Devel::CheckLib guff.
 inc/*
+edit-distance-*.[cho]
+config.h
+text-fuzzy.[cho]
