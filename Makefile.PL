@@ -22,7 +22,12 @@ my $repo = 'https://github.com/benkasminbullock/nearest-module';
 my $object = 'nearest-module.o Nearest.o';
 
 if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
-    $object .= ' text-fuzzy.o edit-distance-char.o edit-distance-int.o';
+    $object .= ' text-fuzzy.o';
+    for my $type (qw/char int/) {
+	for my $algorithm ('', '-trans') {
+	    $object .= " edit-distance-$type$algorithm.o";
+	}
+    }
 }
 
 WriteMakefile (
@@ -32,7 +37,7 @@ WriteMakefile (
     AUTHOR => 'Ben Bullock <bkb@cpan.org>',
     LICENSE => 'perl',
     PREREQ_PM => {
-	'Text::Fuzzy' => '0.11',
+	'Text::Fuzzy' => '0.15',
     },
     META_MERGE => {
         resources => {

@@ -1,5 +1,11 @@
 Revision history for perl module CPAN::Nearest
 
+0.10 2013-12-01
+
+* Add "Changes".
+* Fix build bugs on Microsoft Windows
+* Remove old "README.md". "README" is now auto-generated.
+
 0.09 2013-03-27
 
 0.08 2013-03-13

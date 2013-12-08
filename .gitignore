@@ -18,3 +18,5 @@ inc/*
 edit-distance-*.[cho]
 config.h
 text-fuzzy.[cho]
+# auto-generated
+README
