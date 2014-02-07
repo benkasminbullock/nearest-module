@@ -47,4 +47,5 @@ WriteMakefile (
     },
     OBJECT => $object,
     LIBS => ['-lz',],
+    MIN_PERL_VERSION => '5.008000',
 );
