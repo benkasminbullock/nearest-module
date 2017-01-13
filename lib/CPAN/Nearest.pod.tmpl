@@ -54,13 +54,7 @@ gives
     ! Couldn't find module or a distribution Lingua::Stopwords ()
 
 CPAN::Nearest supplies a spelling-mistake tolerant search for the most
-similar name, intended for people making tools like C<cpan>, C<cpanm>,
-C<pm-uninstall>, and anything else which needs to use the CPAN
-packages list. CPAN::Nearest was written to be fast enough for
-practical use.
-
-CPAN::Nearest was inspired by the helpful "git" version control
-system, which provides suggestions for spelling mistakes.
+similar name.
 
 =head1 FUNCTIONS
 
@@ -76,9 +70,26 @@ search for "Harry::Potter":
 
 The file specified by the first argument, C<$file> in the example, is
 usually found at F<~/.cpan/sources/modules/02packages.details.txt.gz>
-on a Unix-like system. This may be specified as the file name. This
-module can read either a compressed or uncompressed version. There is
-a speed increase of 10-20% when an uncompressed file is used.
+on a Unix-like system. See L</FILES> if you want to locate this
+file. This may be specified as the file name. This module can read
+either a compressed or uncompressed version.
+
+=head1 EXPORTS
+
+L</search> is exported on demand.
+
+=head1 DEPENDENCIES
+
+=over
+
+=item Text::Fuzzy
+
+L<Text::Fuzzy> is used to do the searches of the CPAN data. See
+L</HISTORY>.
+
+=item Gzip::Faster
+
+L<Gzip::Faster> is used to process compressed package files.
 
 =head1 FILES
 
@@ -89,10 +100,18 @@ download the file from the directory F</modules/> of any CPAN mirror.
 
 =head1 HISTORY
 
-This module was the precursor of L<Text::Fuzzy> by the same author
-(Ben Bullock). All of the search functionality of CPAN::Nearest was
-moved to Text::Fuzzy and the XS parts of the module removed in version
-0.13. The standalone C program was also removed from the distribution
-in version 0.13, and its documentation was deleted in version 0.14.
+[% info.colon %] was created as a module for people making tools like
+C<cpan>, C<cpanm>, C<pm-uninstall>, and anything else which needs to
+use the CPAN packages list. It was inspired by the helpful "git"
+version control system, which provides suggestions for spelling
+mistakes. CPAN::Nearest was written to be fast enough for practical
+use by writing it mostly in C with an XS binding to Perl.
+
+It was the precursor of L<Text::Fuzzy> by the same author (Ben
+Bullock). In version 0.13, all of the search functionality of
+CPAN::Nearest was moved to Text::Fuzzy and the XS parts of the module
+were removed, and the package-list reading part rewritten in Perl. The
+standalone C program was also removed from the distribution in version
+0.13, and its documentation was deleted in version 0.14.
 
 [% INCLUDE "author" %]
