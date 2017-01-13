@@ -69,13 +69,10 @@ system, which provides suggestions for spelling mistakes.
     my $close_name = search ($file, $module_name);
 
 Search the package detail file C<$file> for a module named
-C<$module_name> and return the closest name. E.g. if you search for
-"Harry::Potter",
+C<$module_name> and return the closest name. For example, if you
+search for "Harry::Potter":
 
-    my $close_name = search ($file, 'Harry::Potter');
-
-the value in C<$close_name>, the closest CPAN module, is
-"Data::Lotter".
+[% example("harry-potter") %]
 
 The file specified by the first argument, C<$file> in the example, is
 usually found at F<~/.cpan/sources/modules/02packages.details.txt.gz>
@@ -90,28 +87,12 @@ listing the CPAN modules in
 F<~/.cpan/sources/modules/02packages.details.txt.gz>. Others can
 download the file from the directory F</modules/> of any CPAN mirror. 
 
-=head1 STANDALONE PROGRAM
+=head1 HISTORY
 
-The distribution includes a standalone program called "nearest-module"
-as shown in L<this blog
-entry|http://blogs.perl.org/users/ben_bullock/2012/06/find-a-misspelt-module-name.html>. To
-use this program, edit the file F<nearest-module.c> in the top level
-of the distribution to point to the name of the file
-F<02packages.details.txt> or F<02packages.details.txt.gz> on your
-system, and compile it with
-
-    make -f makeitfile nearest-module
-
-It is run with the name of a single module:
-
-    ./nearest-module Lingo::Jingo::Mojo
-    Closest to 'Lingo::Jingo::Mojo' is 'Lingua::JA::Moji'.
-
-There is a C<-v> option to view candidate modules:
-
-    $ ./nearest-module -v Lingo::Jingo::Mojo
-    Games::Bingo::Bot (9) is nearer than 10.
-    Lingua::JA::Moji (7) is nearer than 9.
-    Closest to 'Lingo::Jingo::Mojo' is 'Lingua::JA::Moji'.
+This module was the precursor of L<Text::Fuzzy> by the same author
+(Ben Bullock). All of the search functionality of CPAN::Nearest was
+moved to Text::Fuzzy and the XS parts of the module removed in version
+0.13. The standalone C program was also removed from the distribution
+in version 0.13, and its documentation was deleted in version 0.14.
 
 [% INCLUDE "author" %]

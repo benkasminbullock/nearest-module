@@ -4,10 +4,10 @@ use strict;
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw/search/;
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 use Carp;
 use Text::Fuzzy '0.25';
-use Gzip::Faster '0.18', ':all';
+use Gzip::Faster '0.18', 'gunzip_file';
 #use XSLoader;
 #XSLoader::load 'CPAN::Nearest', $VERSION;
 
