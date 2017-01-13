@@ -1,5 +1,9 @@
 Revision history for perl module CPAN::Nearest
 
+0.13 2017-01-13
+
+* Use "Text::Fuzzy"
+
 0.12 2014-02-07
 
 * Declare minimum Perl version for module in Makefile.PL.

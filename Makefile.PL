@@ -19,16 +19,16 @@ my $repo = 'https://github.com/benkasminbullock/nearest-module';
 
 # Objects to link to.
 
-my $object = 'nearest-module.o Nearest.o';
+#my $object = 'nearest-module.o Nearest.o';
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
-    $object .= ' text-fuzzy.o';
-    for my $type (qw/char int/) {
-	for my $algorithm ('', '-trans') {
-	    $object .= " edit-distance-$type$algorithm.o";
-	}
-    }
-}
+#if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+#    $object .= ' text-fuzzy.o';
+#    for my $type (qw/char int/) {
+#	for my $algorithm ('', '-trans') {
+#	    $object .= " edit-distance-$type$algorithm.o";
+#	}
+#    }
+#}
 
 WriteMakefile (
     NAME => 'CPAN::Nearest',
@@ -37,7 +37,8 @@ WriteMakefile (
     AUTHOR => 'Ben Bullock <bkb@cpan.org>',
     LICENSE => 'perl',
     PREREQ_PM => {
-	'Text::Fuzzy' => '0.15',
+	'Text::Fuzzy' => '0.25',
+	'Gzip::Faster' => '0.18',
     },
     META_MERGE => {
         resources => {
@@ -45,7 +46,7 @@ WriteMakefile (
             bugtracker => "$repo/issues",
         },
     },
-    OBJECT => $object,
-    LIBS => ['-lz',],
+#    OBJECT => $object,
+#    LIBS => ['-lz',],
     MIN_PERL_VERSION => '5.008000',
 );

@@ -1,12 +1,28 @@
+[% start_year=2012 %]
+[% MACRO example(file) BLOCK %]
+[%- pl = file _ ".pl" -%]
+[%- out = file _ "-out.txt" -%]
+[% INCLUDE $pl | xtidy %]
+
+produces output
+
+[% INCLUDE $out | xtidy %]
+
+(This example is included as L<F<[% pl %]>|https://api.metacpan.org/source/BKB/[% info.name %]-[% info.version %]/examples/[% pl %]> in the distribution.)
+[% END %]
 =head1 NAME
 
-CPAN::Nearest - find the nearest module to a given name.
+[% info.colon %] - find the nearest module to a given name.
 
 =head1 SYNOPSIS
 
-    use CPAN::Nearest 'search';
-    my $module = search ('02package.details.txt', 'Lingua::Stop::Wars');
-    # Now $module = "Lingua::StopWords";
+[% example("synopsis") %]
+
+=head1 VERSION
+
+This documents [% info.colon %] version [% info.version %]
+corresponding to git commit L<[% commit.commit %]|[% info.repo
+%]/commit/[% commit.commit %]> released on [% commit.date %].
 
 =head1 DESCRIPTION
 
