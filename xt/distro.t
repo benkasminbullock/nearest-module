@@ -35,6 +35,10 @@ for (@tgz) {
 	$files{$1} = 1;
 	$badfiles{$1} = 1;
     }
+    if (m!((?:^|/)?xt/.*)$!) {
+	$files{$1} = 1;
+	$badfiles{$1} = 1;
+    }
 }
 ok (! $files{".tmpl"}, "no templates in distro");
 ok (! $files{"-out.txt"}, "no out.txt in distro");
